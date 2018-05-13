@@ -32,47 +32,102 @@
 
             var player;
             var stars;
-            var spikes;
+            var bombs;
             var cursors;
             var score = 0;
             var gameOver = false;
             var scoreText;
-            var leftSpikes;
-            var rightSpikes;
             var game = new Phaser.Game(config);
 
             function preload(){
                 this.load.image('background', 'assets/background.png');
                 this.load.image('star', 'assets/star.png');
-                this.load.image('rightSpike', 'assets/rightSpike.png');
-                this.load.image('leftSpike', 'assets/leftSpike.png');
+                this.load.image('bomb', 'assets/bomb.png');
                 this.load.image('ball', 'assets/ball.png');
             }
 
             function create(){
+                // Background
                 this.add.image(400, 300, 'background');
-                
-				leftSpikes = this.physics.add.sprite(0, 0, 'leftSpike').setOrigin(0, 0).setScale(0.5);
-				rightSpikes = this.physics.add.sprite(700, 15, 'rightSpike').setOrigin(0, 0).setScale(0.5);
+
+                // The bombs group contains 15 bombs
+                bombs = this.physics.add.staticGroup();
+                for (var i = 0; i < 10; i++) {
+                    createBomb(bombs);
+                }
+
+                // The player and its settings
                 player = this.physics.add.sprite(370, 50, 'ball');
                 player.displayWidth = 50;
                 player.displayHeight = 50;
        			player.setBounce(0.2);
        			player.setCollideWorldBounds(true);
+
+                // Input Events
+                cursors = this.input.keyboard.createCursorKeys();
+
+                // Stars
+                stars = this.physics.add.staticGroup();
+                for (var i = 0; i < 3; i++) {
+                    stars.create((Math.round(Math.random() * (750 - 50)) + 50), (Math.round(Math.random() * (550 - 70)) + 70), 'star');
+                }
+
+                // The score
+                scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#f00' });
+
+                // Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
+                this.physics.add.overlap(player, stars, collectStar, null, this);
+
+                // Checks to see if the player collides with any of the bombs, if he does call the hitSpike function
+                this.physics.add.collider(player, bombs, hitBomb, null, this);
             }
 
             function update(){
-               leftSpikes.body.setVelocityY(100);
-               rightSpikes.body.setVelocityY(100);
+                if (gameOver){
+                    return;
+                }
+
+                if (cursors.left.isDown){
+                    player.setVelocityX(-160);
+                }
+
+                else if (cursors.right.isDown){
+                    player.setVelocityX(160);
+                }
+
+                else{
+                    player.setVelocityX(0);
+                }
+
+                if (cursors.up.isDown){
+                    player.setVelocityY(-200);
+                }
             }
 
             function collectStar(player, star){
-               
-                
+                star.disableBody(true, true);
+
+                //  Add and update the score
+                score += 10;
+                scoreText.setText('Score: ' + score);
+
+                // If we catch all the star, we create 3 more
+                if (stars.countActive(true) === 0){
+                    createBomb(bombs);
+                    for (var i = 0; i < 3; i++) {
+                        stars.create((Math.round(Math.random() * (750 - 50)) + 50), (Math.round(Math.random() * (550 - 70)) + 70), 'star');
+                    }
+                }
             }
 
-            function hitSpike(player, spike){
-               
+            function createBomb(bombs){
+                bombs.create((Math.round(Math.random() * (750 - 50)) + 50), (Math.round(Math.random() * (550 - 70)) + 70), 'bomb');
+            }
+
+            function hitBomb(player, bomb){
+                this.physics.pause();
+                player.setTint(0x00000);
+                gameOver = true;
             }
         </script>
     </body>
