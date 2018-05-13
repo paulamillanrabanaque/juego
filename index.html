@@ -56,15 +56,11 @@
                     createBomb(bombs);
                 }
 
-                // The spikes group contains 3 leftSpikes and 3 rightSpikes, with random "y" positions
-                spikes = this.physics.add.staticGroup();
-                createSpikes(spikes);
-
                 // The player and its settings
                 player = this.physics.add.sprite(370, 50, 'ball');
                 player.displayWidth = 50;
                 player.displayHeight = 50;
-                player.setBounce(0.2);
+                player.setBounce(0.5);
                 player.setCollideWorldBounds(true);
 
                 // Input Events
