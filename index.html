@@ -32,25 +32,29 @@
 
             var player;
             var stars;
-            var spikes;
+            var bombs;
             var cursors;
             var score = 0;
             var gameOver = false;
             var scoreText;
-            var timer;
             var game = new Phaser.Game(config);
 
             function preload(){
                 this.load.image('background', 'assets/background.png');
                 this.load.image('star', 'assets/star.png');
-                this.load.image('rightSpike', 'assets/rightSpike.png');
-                this.load.image('leftSpike', 'assets/leftSpike.png');
+                this.load.image('bomb', 'assets/bomb.png');
                 this.load.image('ball', 'assets/ball.png');
             }
 
             function create(){
                 // Background
                 this.add.image(400, 300, 'background');
+
+                // The bombs group contains 15 bombs
+                bombs = this.physics.add.staticGroup();
+                for (var i = 0; i < 10; i++) {
+                    createBomb(bombs);
+                }
 
                 // The spikes group contains 3 leftSpikes and 3 rightSpikes, with random "y" positions
                 spikes = this.physics.add.staticGroup();
@@ -78,8 +82,8 @@
                 // Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
                 this.physics.add.overlap(player, stars, collectStar, null, this);
 
-                // Checks to see if the player collides with any of the spikes, if he does call the hitSpike function
-                this.physics.add.collider(player, spikes, hitSpike, null, this);
+                // Checks to see if the player collides with any of the bombs, if he does call the hitSpike function
+                this.physics.add.collider(player, bombs, hitBomb, null, this);
             }
 
             function update(){
@@ -113,23 +117,18 @@
 
                 // If we catch all the star, we create 3 more
                 if (stars.countActive(true) === 0){
-                    createSpikes(spikes);
+                    createBomb(bombs);
                     for (var i = 0; i < 3; i++) {
                         stars.create((Math.round(Math.random() * (750 - 50)) + 50), (Math.round(Math.random() * (550 - 70)) + 70), 'star');
                     }
                 }
             }
 
-            function createSpikes(spikes){
-                for (var i = 0; i < 3; i++) {
-                    spikes.create(80, (Math.round(Math.random() * (560 - 40)) + 40), 'leftSpike').setScale(0.8);
-                }
-                for (var i = 0; i < 3; i++) {
-                    spikes.create(720, (Math.round(Math.random() * (550 - 50)) + 50), 'rightSpike').setScale(0.8);
-                }
+            function createBomb(bombs){
+                bombs.create((Math.round(Math.random() * (750 - 50)) + 50), (Math.round(Math.random() * (550 - 70)) + 70), 'bomb');
             }
 
-            function hitSpike(player, spike){
+            function hitBomb(player, bomb){
                 this.physics.pause();
                 player.setTint(0x00000);
                 gameOver = true;
